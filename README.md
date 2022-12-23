@@ -1,5 +1,5 @@
 ## vue-to-setup
-将vue模板转换为setup模板工具
+将vue模板转换为setup模板工具 WIP
 
 ## License
 [MIT](./LICENSE) License © 2022 [Simon He](https://github.com/Simon-He95)
