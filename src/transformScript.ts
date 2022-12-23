@@ -37,7 +37,7 @@ function getProps(r: string) {
     return v
   })
   if (definePropsType) {
-    return `const props = defineProps<${definePropsType}>()`
+    return `const props = defineProps<{${definePropsType}}>()`
   }
 }
 

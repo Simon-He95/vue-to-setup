@@ -16,6 +16,9 @@
     "vue-to-setup",
     "vue"
   ],
+  "bin": {
+    "setup": "./cli.mjs"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

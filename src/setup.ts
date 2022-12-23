@@ -1,7 +1,7 @@
 import fg from 'fast-glob'
 import path from 'path'
 import fsp from 'fs/promises'
-import { parse, compileScript, babelParse } from 'vue/compiler-sfc'
+import { parse } from 'vue/compiler-sfc'
 import { transform } from './transformScript'
 export async function setup() {
   const fileDir = process.argv[2]
@@ -27,10 +27,14 @@ export async function setup() {
     const _template = `\n<template>${templateStr}</template>\n`
     const _script = `<script setup${script.lang ? ` lang="${script.lang}"` : ''}>${transform(scriptStr)}\n</script>\n`
     const result = _script + _template + _style
-    console.log(result);
+    const newPath = path.dirname(_url) + '/' + path.basename(_url).replace('.vue', '__transform.vue')
 
+    // generate new file
+    fsp.writeFile(newPath, result)
   })
 }
+
+
 
 
 setup()

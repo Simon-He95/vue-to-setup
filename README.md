@@ -1,6 +1,18 @@
 ## vue-to-setup
 将vue模板转换为setup模板工具 WIP
 
+## Install
+```
+  npm i -g vue-to-setup
+```
+
+## Usage
+```
+  // generate new xx__transform.vue
+  setup playground
+```
+
+
 ## License
 [MIT](./LICENSE) License © 2022 [Simon He](https://github.com/Simon-He95)
 

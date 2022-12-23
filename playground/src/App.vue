@@ -15,13 +15,13 @@ export default defineComponent({
   },
   props: {
     items: Array as PropType<number[]>,
-    arr: Array
+    arr: []
   },
   emit: ["click"],
   setup(props, { emit, attrs, slots: mySlots, expose }) {
     const bar = ref(0)
     expose({ bar })
-    emit("change");
+    emit("click");
     return {
       bar
     }
