@@ -14,7 +14,8 @@ export default defineComponent({
     touchdir,
   },
   props: {
-    items: Array as PropType<number[]>
+    items: Array as PropType<number[]>,
+    arr: Array
   },
   emit: ["click"],
   setup(props, { emit, attrs, slots: mySlots, expose }) {

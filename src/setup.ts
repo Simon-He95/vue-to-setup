@@ -1,9 +1,9 @@
 import fg from 'fast-glob'
 import path from 'path'
 import fsp from 'fs/promises'
-import { compileScript, parse } from 'vue/compiler-sfc'
-import { transform } from './transform'
-export async function start() {
+import { parse } from 'vue/compiler-sfc'
+import { transform } from './transformScript'
+export async function setup() {
   const fileDir = process.argv[2]
   const url = path.resolve(process.cwd(), fileDir)
   const entries = await fg(['**.vue'], {
@@ -16,8 +16,6 @@ export async function start() {
     const id = _url
     const { descriptor } = parse(source);
     if (!descriptor.script || descriptor.scriptSetup) return
-    const scriptResult = compileScript(descriptor, { id })
-    console.log(descriptor)
     const { script, styles, template } = descriptor
     const styleStr = styles[0].content
     const templateStr = template?.content || ''
@@ -28,9 +26,8 @@ export async function start() {
     const _template = `\n<template>${templateStr}</template>\n`
     const _script = `<script setup${script.lang ? ` lang="${script.lang}"` : ''}>${transform(scriptStr)}</script>\n`
     const result = _script + _template + _style
-    console.log(result);
   })
 }
 
 
-start()
+setup()
