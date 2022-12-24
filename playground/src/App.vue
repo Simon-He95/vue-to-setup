@@ -10,6 +10,14 @@ export default {
       age:14
     }
   },
+  methods:{
+    increment() {
+      this.age++
+    },
+    decrement(){
+      this.age--
+    }
+  },
   mounted(){
     console.log('hi') // 0
   }

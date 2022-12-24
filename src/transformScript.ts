@@ -7,11 +7,12 @@ const EMIT = /emit:\s*(\[.*\])/gsm
 const SETUP = /setup\([\w,\s{}:]+\)\s*{(.*)}\n/gsm
 const RETURN = /return\s*{.*}$/gsm
 const MOUNTED = /mounted\(\){(.*)}\n/gsm
-const THIS = /this.([\w\_\-$]+)/gsm
 const THISFN = /this.([\w\_\-$]+\(\))/gsm
 const EXPORTDEFAULT = /export default\s*{(.*)}/gsm
-const DATA = /data\s*\(\s*\)\s*{[\n\s]*return\s*{[\n\s]*(.*)}[\n\s]*},/gsm
+const DATA = /data\s*\(\s*\)\s*{[\n\s]*return\s*{[\n\s]*([\n\s\w\_:'",]+)}[\s\n]*},/gm
 const DATAITEM = /(.*):\s*(.*)[,\n\s]/gm
+const METHODS = /methods:\s*{(.*)},/gms
+const THISDEEP = /this.([$\_\w]+)[.]*/gms
 export function transform(scriptStr: string): string {
   let result = ''
   if (DEFINECOMPONENT.test(scriptStr)) {
@@ -29,10 +30,13 @@ export function transform(scriptStr: string): string {
     scriptStr.replace(EXPORTDEFAULT, (_, r) => {
       const name = getName(r) // defineOptions
       const props = getProps(r)
+
       const emit = getEmit(r)
       const data = getData(r)
       const mounted = getMounted(r)
-      result = [name, props, emit, data, mounted].join('\n')
+      const methods = getMethods(r)
+
+      result = [name, props, emit, data, methods, mounted].join('\n')
       return r
     })
   }
@@ -85,8 +89,7 @@ function getSetup(r: string) {
 function getMounted(r: string) {
   let result
   r.replace(MOUNTED, ((_: string, v: string) => {
-    result = tidy(v.replace(THISFN, (_, c) => c)
-      .replace(THIS, (_, c) => c + '.value'))
+    result = getThisTransform(v)
     return v
   }))
   if (result) {
@@ -106,6 +109,7 @@ function getData(r: string) {
   let result: string = ''
   r.replace(DATA, (_, v) => {
     return v.replace(DATAITEM, (_: string, key: string, val: string) => {
+
       if (val.endsWith(','))
         val = val.substring(0, val.length - 1)
       result += `const ${key.trim()} = ref(${val})\n`
@@ -113,4 +117,21 @@ function getData(r: string) {
     })
   })
   return result
+}
+
+function getMethods(r: string) {
+  let result
+  r.replace(METHODS, (_, v) => {
+    const space = '$__temp'
+    v = v.replace(/,\n\s*/g, space)
+    result = getThisTransform(v).split(space).map(item => `function ${item}`).join('\n')
+    return result
+  })
+  return result
+}
+
+function getThisTransform(r: string) {
+  return tidy(r
+    .replace(THISFN, (_, c) => c)
+    .replace(THISDEEP, (_, v) => `${v}.value`))
 }
