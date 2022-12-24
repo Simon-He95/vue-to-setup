@@ -11,7 +11,7 @@ const THISFN = /this.([\w\_\-$]+\(\))/gsm
 const EXPORTDEFAULT = /export default\s*{(.*)}/gsm
 const DATA = /data\s*\(\s*\)\s*{[\n\s]*return\s*{[\n\s]*([\n\s\w\_:'",]+)}[\s\n]*},/gm
 const DATAITEM = /(.*):\s*(.*)[,\n\s]/gm
-const METHODS = /methods:\s*{(.*)},/gms
+const METHODS = /methods:\s*{([\w\s\n"'\-\_$+\-{}\(\).,]*)},/gms
 const THISDEEP = /this.([$\_\w]+)[.]*/gms
 const COMPUTED = /computed:\s*{([\s\n\w\(\){}"'$-_]*)},/gm
 const COMPUTEDITEM = /(\w+)\(\)(\s*{[\s\n\w\-\+"'$\_.]*})/gm
@@ -32,7 +32,6 @@ export function transform(scriptStr: string): string {
     scriptStr.replace(EXPORTDEFAULT, (_, r) => {
       const name = getName(r) // defineOptions
       const props = getProps(r)
-
       const emit = getEmit(r)
       const data = getData(r)
       const mounted = getMounted(r)

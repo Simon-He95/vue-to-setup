@@ -7,19 +7,18 @@ const props = defineProps<{name:String}>()
 const name = ref('simon')
 const age = ref(14)
 
+const name = computed(() => {
+return 'as'
+})
+const age = computed(() => {
+return 'as'
+})
+
 function increment() {
 age.value++
 }
 function decrement(){
 age.value--
-}
-}
-function computed:{
-name(){
-return 'as'
-}
-function age(){
-return 'as'
 }
 onMounted(()=>{
 console.log('hi') // 0
