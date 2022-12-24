@@ -2,20 +2,13 @@
 defineOptions({
   name: 'App'
 })
-const props = defineProps<{items:number[];arr:[]}>()
-const emit = defineEmits(["click"])
-const bar = ref(0)
-const fn = ()=>bar.value++
-defineExpose({ bar })
-emit("click");
+const props = defineProps<{name:String}>()
 
-},
-mounted(){
-this.fn()
-console.log(this.bar) // 0
+const name = ref('simon')
+const age = ref(14)
+
 onMounted(()=>{
-fn()
-console.log(bar.value) // 0
+console.log('hi') // 0
 })
 </script>
 

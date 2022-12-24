@@ -9,18 +9,34 @@ const RETURN = /return\s*{.*}$/gsm
 const MOUNTED = /mounted\(\){(.*)}\n/gsm
 const THIS = /this.([\w\_\-$]+)/gsm
 const THISFN = /this.([\w\_\-$]+\(\))/gsm
+const EXPORTDEFAULT = /export default\s*{(.*)}/gsm
+const DATA = /data\s*\(\s*\)\s*{[\n\s]*return\s*{[\n\s]*(.*)}[\n\s]*},/gsm
+const DATAITEM = /(.*):\s*(.*)[,\n\s]/gm
 export function transform(scriptStr: string): string {
   let result = ''
-  scriptStr.replace(DEFINECOMPONENT, (_, r) => {
-    const name = getName(r) // defineOptions
-    const props = getProps(r)
-    const emit = getEmit(r)
-    const setup = getSetup(r)
-    const mounted = getMounted(r)
+  if (DEFINECOMPONENT.test(scriptStr)) {
+    scriptStr.replace(DEFINECOMPONENT, (_, r) => {
+      const name = getName(r) // defineOptions
+      const props = getProps(r)
+      const emit = getEmit(r)
+      const setup = getSetup(r)
+      const mounted = getMounted(r)
 
-    result = [name, props, emit, setup, mounted].join('\n')
-    return result
-  })
+      result = [name, props, emit, setup, mounted].join('\n')
+      return result
+    })
+  } else if (EXPORTDEFAULT.test(scriptStr)) {
+    scriptStr.replace(EXPORTDEFAULT, (_, r) => {
+      const name = getName(r) // defineOptions
+      const props = getProps(r)
+      const emit = getEmit(r)
+      const data = getData(r)
+      const mounted = getMounted(r)
+      result = [name, props, emit, data, mounted].join('\n')
+      return r
+    })
+  }
+
   return result
 }
 
@@ -84,4 +100,17 @@ function tidy(v: string) {
     .replace(/\n/g, space)
     .replace(/\s{2,}/g, '\n')
     .replaceAll(space, '')
+}
+
+function getData(r: string) {
+  let result: string = ''
+  r.replace(DATA, (_, v) => {
+    return v.replace(DATAITEM, (_: string, key: string, val: string) => {
+      if (val.endsWith(','))
+        val = val.substring(0, val.length - 1)
+      result += `const ${key.trim()} = ref(${val})\n`
+      return v
+    })
+  })
+  return result
 }
