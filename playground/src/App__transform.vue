@@ -13,6 +13,14 @@ age.value++
 function decrement(){
 age.value--
 }
+}
+function computed:{
+name(){
+return 'as'
+}
+function age(){
+return 'as'
+}
 onMounted(()=>{
 console.log('hi') // 0
 })

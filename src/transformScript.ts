@@ -13,6 +13,8 @@ const DATA = /data\s*\(\s*\)\s*{[\n\s]*return\s*{[\n\s]*([\n\s\w\_:'",]+)}[\s\n]
 const DATAITEM = /(.*):\s*(.*)[,\n\s]/gm
 const METHODS = /methods:\s*{(.*)},/gms
 const THISDEEP = /this.([$\_\w]+)[.]*/gms
+const COMPUTED = /computed:\s*{([\s\n\w\(\){}"'$-_]*)},/gm
+const COMPUTEDITEM = /(\w+)\(\)(\s*{[\s\n\w\-\+"'$\_.]*})/gm
 export function transform(scriptStr: string): string {
   let result = ''
   if (DEFINECOMPONENT.test(scriptStr)) {
@@ -35,8 +37,9 @@ export function transform(scriptStr: string): string {
       const data = getData(r)
       const mounted = getMounted(r)
       const methods = getMethods(r)
+      const computed = getComputed(r)
 
-      result = [name, props, emit, data, methods, mounted].join('\n')
+      result = [name, props, emit, data, computed, methods, mounted].join('\n')
       return r
     })
   }
@@ -134,4 +137,12 @@ function getThisTransform(r: string) {
   return tidy(r
     .replace(THISFN, (_, c) => c)
     .replace(THISDEEP, (_, v) => `${v}.value`))
+}
+
+function getComputed(r: string) {
+  let result = ''
+  r.replace(COMPUTED, (_, v) =>
+    getThisTransform(v).replace(COMPUTEDITEM, (_, key, val) =>
+      result += `const ${key} = computed(() => ${val})\n`))
+  return result
 }

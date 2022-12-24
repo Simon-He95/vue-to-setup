@@ -18,6 +18,15 @@ export default {
       this.age--
     }
   },
+  computed:{
+    name(){
+      return 'as'
+    },
+    age(){
+      return 'as'
+
+    }
+  },
   mounted(){
     console.log('hi') // 0
   }
