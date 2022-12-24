@@ -6,14 +6,20 @@ const PROPSHASAS = /(\w+):\s*\w+\s*as\s*PropType<([\w\[\]]+)>/gsm
 const EMIT = /emit:\s*(\[.*\])/gsm
 const SETUP = /setup\([\w,\s{}:]+\)\s*{(.*)}\n/gsm
 const RETURN = /return\s*{.*}$/gsm
+const MOUNTED = /mounted\(\){(.*)}\n/gsm
+const THIS = /this.([\w\_\-$]+)/gsm
+const THISFN = /this.([\w\_\-$]+\(\))/gsm
 export function transform(scriptStr: string): string {
   let result = ''
-  scriptStr.replace(DEFINECOMPONENT, (match, r) => {
+  scriptStr.replace(DEFINECOMPONENT, (_, r) => {
     const name = getName(r) // defineOptions
     const props = getProps(r)
     const emit = getEmit(r)
     const setup = getSetup(r)
-    result = '\n' + name + '\n' + props + '\n' + emit + '\n' + setup
+    const mounted = getMounted(r)
+
+    result = [name, props, emit, setup, mounted].join('\n')
+    return result
   })
   return result
 }
@@ -54,12 +60,28 @@ function getSetup(r: string) {
   r.replace(SETUP, (_: string, v: string) => {
     v = v.replace('expose(', 'defineExpose(')
       .replace(RETURN, '')
-    const space = '$__x__'
-    setup = trim(v)
-      .replace(/\n/g, space)
-      .replace(/\s{2,}/g, '\n')
-      .replaceAll(space, '')
+    setup = tidy(v)
     return v
   })
   return setup
+}
+
+function getMounted(r: string) {
+  let result
+  r.replace(MOUNTED, ((_: string, v: string) => {
+    result = tidy(v.replace(THISFN, (_, c) => c)
+      .replace(THIS, (_, c) => c + '.value'))
+    return v
+  }))
+  if (result) {
+    return `onMounted(()=>{\n${result}\n})`
+  }
+}
+
+function tidy(v: string) {
+  const space = '$__x__'
+  return trim(v)
+    .replace(/\n/g, space)
+    .replace(/\s{2,}/g, '\n')
+    .replaceAll(space, '')
 }

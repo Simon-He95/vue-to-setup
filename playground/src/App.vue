@@ -20,11 +20,17 @@ export default defineComponent({
   emit: ["click"],
   setup(props, { emit, attrs, slots: mySlots, expose }) {
     const bar = ref(0)
+    const fn = ()=>bar.value++
     expose({ bar })
     emit("click");
     return {
-      bar
+      bar,
+      fn
     }
+  },
+  mounted(){
+    this.fn()
+    console.log(this.bar) // 0
   }
 })
 </script>

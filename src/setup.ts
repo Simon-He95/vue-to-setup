@@ -25,7 +25,7 @@ export async function setup() {
     const { scoped, lang } = styles[0]
     const _style = `\n<style ${scoped ? 'scoped ' : ''}${lang ? `lang="${lang}"` : ''}>${styleStr}</style>`
     const _template = `\n<template>${templateStr}</template>\n`
-    const _script = `<script setup${script.lang ? ` lang="${script.lang}"` : ''}>${transform(scriptStr)}\n</script>\n`
+    const _script = `<script setup${script.lang ? ` lang="${script.lang}"` : ''}>\n${transform(scriptStr)}\n</script>\n`
     const result = _script + _template + _style
     const newPath = path.dirname(_url) + '/' + path.basename(_url).replace('.vue', '__transform.vue')
 
