@@ -11,7 +11,7 @@ export default {
   },
   watch:{
     count(v){
-      console.log(this.name)
+      console.log(v)
     },
     name(v){
       console.log(v);
