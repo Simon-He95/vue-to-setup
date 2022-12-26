@@ -15,35 +15,68 @@ const METHODS = /methods:\s*{([\w\s\n"'\-\_$+\-{}\(\).,]*)},/gms
 const THISDEEP = /this.([$\_\w]+)[.]*/gms
 const COMPUTED = /computed:\s*{([\s\n\w\(\){}"'$-_]*)},/gm
 const COMPUTEDITEM = /(\w+)\(\)(\s*{[\s\n\w\-\+"'$\_.]*})/gm
+const IMPORTFROMVUE = /import\s+{([\w$,\s]+)}\s+from\s+['"]vue['"]/gm
 export function transform(scriptStr: string): string {
   let result = ''
+  const import_from_vue: string[] = []
+
+  scriptStr = scriptStr.replace(IMPORTFROMVUE, (_, v) => {
+    import_from_vue.push(...trim(v, 'all').split(','))
+    return ''
+  })
   if (DEFINECOMPONENT.test(scriptStr)) {
     scriptStr.replace(DEFINECOMPONENT, (_, r) => {
       const name = getName(r) // defineOptions
       const props = getProps(r)
+      if (props && !import_from_vue.includes('defineProps')) {
+        import_from_vue.push('defineProps')
+      }
       const emit = getEmit(r)
+      if (emit && !import_from_vue.includes('defineEmits')) {
+        import_from_vue.push('defineEmits')
+      }
       const setup = getSetup(r)
+      if (setup && !import_from_vue.includes('ref')) {
+        import_from_vue.push('ref')
+      }
       const mounted = getMounted(r)
-
-      result = [name, props, emit, setup, mounted].join('\n')
+      if (mounted && !import_from_vue.includes('onMounted')) {
+        import_from_vue.push('onMounted')
+      }
+      result = '\n' + [name, props, emit, setup, mounted].join('\n')
       return result
     })
   } else if (EXPORTDEFAULT.test(scriptStr)) {
     scriptStr.replace(EXPORTDEFAULT, (_, r) => {
       const name = getName(r) // defineOptions
       const props = getProps(r)
+      if (props && !import_from_vue.includes('defineProps')) {
+        import_from_vue.push('defineProps')
+      }
       const emit = getEmit(r)
+      if (emit && !import_from_vue.includes('defineEmits')) {
+        import_from_vue.push('defineEmits')
+      }
       const data = getData(r)
+      if (data && !import_from_vue.includes('ref')) {
+        import_from_vue.push('ref')
+      }
       const mounted = getMounted(r)
+      if (mounted && !import_from_vue.includes('onMounted')) {
+        import_from_vue.push('onMounted')
+      }
       const methods = getMethods(r)
       const computed = getComputed(r)
-
-      result = [name, props, emit, data, computed, methods, mounted].join('\n')
+      if (computed && !import_from_vue.includes('computed')) {
+        import_from_vue.push('computed')
+      }
+      result = '\n' + [name, props, emit, data, computed, methods, mounted].join('\n')
       return r
     })
   }
+  const _import_ = `import { ${import_from_vue.join(', ')} } from 'vue'\n`
 
-  return result
+  return _import_ + result
 }
 
 function getName(r: string) {
