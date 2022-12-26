@@ -1,6 +1,6 @@
 import { trim } from 'lazy-js-utils'
 const DEFINECOMPONENT = /^export default defineComponent\((.*})\)$/gms
-const NAME = /name:\s*(['"\w]+)/
+const NAME = /{\n\s*name:\s*(['"]\w+['"])/
 const PROPS = /props:\s*{[\s\n]*([\w:<>\s\[\],]+)}/gsm
 const PROPSHASAS = /(\w+):\s*\w+\s*as\s*PropType<([\w\[\]]+)>/gsm
 const EMIT = /emit:\s*(\[.*\])/gsm
@@ -26,50 +26,65 @@ export function transform(scriptStr: string): string {
   })
   if (DEFINECOMPONENT.test(scriptStr)) {
     scriptStr.replace(DEFINECOMPONENT, (_, r) => {
-      const name = getName(r) // defineOptions
-      const props = getProps(r)
+      const [props, r1] = getProps(r)
+      r = r1
       if (props && !import_from_vue.includes('defineProps')) {
         import_from_vue.push('defineProps')
       }
-      const emit = getEmit(r)
+      const [emit, r2] = getEmit(r)
+      r = r2
       if (emit && !import_from_vue.includes('defineEmits')) {
         import_from_vue.push('defineEmits')
       }
-      const setup = getSetup(r)
+      const [setup, r3] = getSetup(r)
+      r = r3
       if (setup && !import_from_vue.includes('ref')) {
         import_from_vue.push('ref')
       }
-      const mounted = getMounted(r)
+      const [mounted, r4] = getMounted(r)
+      r = r4
       if (mounted && !import_from_vue.includes('onMounted')) {
         import_from_vue.push('onMounted')
       }
+      const [name, r5] = getName(r) // defineOptions
+      r = r5
+
       result = '\n' + [name, props, emit, setup, mounted].join('\n')
       return result
     })
   } else if (EXPORTDEFAULT.test(scriptStr)) {
     scriptStr.replace(EXPORTDEFAULT, (_, r) => {
-      const name = getName(r) // defineOptions
-      const props = getProps(r)
+      const [props, r1] = getProps(r)
+      r = r1
       if (props && !import_from_vue.includes('defineProps')) {
         import_from_vue.push('defineProps')
       }
-      const emit = getEmit(r)
+      const [emit, r2] = getEmit(r)
+      r = r2
       if (emit && !import_from_vue.includes('defineEmits')) {
         import_from_vue.push('defineEmits')
       }
-      const data = getData(r)
+      const [data, r3] = getData(r)
+      r = r3
+
       if (data && !import_from_vue.includes('ref')) {
         import_from_vue.push('ref')
       }
-      const mounted = getMounted(r)
+      const [mounted, r4] = getMounted(r)
+      r = r4
       if (mounted && !import_from_vue.includes('onMounted')) {
         import_from_vue.push('onMounted')
       }
-      const methods = getMethods(r)
-      const computed = getComputed(r)
+      const [methods, r5] = getMethods(r)
+      r = r5
+      const [computed, r6] = getComputed(r)
+      r = r6
       if (computed && !import_from_vue.includes('computed')) {
         import_from_vue.push('computed')
       }
+      const [name, r7] = getName(r) // defineOptions
+      r = r7
+
       result = '\n' + [name, props, emit, data, computed, methods, mounted].join('\n')
       return r
     })
@@ -81,55 +96,66 @@ export function transform(scriptStr: string): string {
 
 function getName(r: string) {
   let name
-  r.replace(NAME, (_: string, v: string) => (name = v))
+  r = r.replace(NAME, (_: string, v: string) => {
+    name = v
+    return ''
+  })
   if (name) {
     // defineOptions
-    return `defineOptions({
+    return [`defineOptions({
   name: ${name}
-})`
+})`, r]
   }
+  return [name, r]
 }
 
 function getProps(r: string) {
-  let definePropsType = ''
-  r.replace(PROPS, (_: string, v: string) => {
+  let definePropsType
+  r = r.replace(PROPS, (_: string, v: string) => {
     v = v.replace(PROPSHASAS, (_, v1, v2) => `${v1}: ${v2}`)
     definePropsType = trim(v, 'all').replace(',', ';')
-    return v
+    return ''
   })
   if (definePropsType) {
-    return `const props = defineProps<{${definePropsType}}>()`
+    return [`const props = defineProps<{${definePropsType}}>()`, r]
   }
+  return [definePropsType, r]
 }
 
 function getEmit(r: string) {
   let emit
-  r.replace(EMIT, (_: string, v: string) => (emit = v))
+  r = r.replace(EMIT, (_: string, v: string) => {
+    emit = v
+    return ''
+  })
   if (emit) {
-    return `const emit = defineEmits(${emit})`
+    return [`const emit = defineEmits(${emit})`, r]
   }
+  return [emit, r]
+
 }
 
 function getSetup(r: string) {
   let setup
-  r.replace(SETUP, (_: string, v: string) => {
+  r = r.replace(SETUP, (_: string, v: string) => {
     v = v.replace('expose(', 'defineExpose(')
       .replace(RETURN, '')
     setup = tidy(v)
-    return v
+    return ''
   })
-  return setup
+  return [setup, r]
 }
 
 function getMounted(r: string) {
   let result
-  r.replace(MOUNTED, ((_: string, v: string) => {
+  r = r.replace(MOUNTED, ((_: string, v: string) => {
     result = getThisTransform(v)
-    return v
+    return ''
   }))
   if (result) {
-    return `onMounted(()=>{\n${result}\n})`
+    return [`onMounted(()=>{\n${result}\n})`, r]
   }
+  return [result, r]
 }
 
 function tidy(v: string) {
@@ -142,27 +168,27 @@ function tidy(v: string) {
 
 function getData(r: string) {
   let result: string = ''
-  r.replace(DATA, (_, v) => {
-    return v.replace(DATAITEM, (_: string, key: string, val: string) => {
-
+  r = r.replace(DATA, (_, v) => {
+    v.replace(DATAITEM, (_: string, key: string, val: string) => {
       if (val.endsWith(','))
         val = val.substring(0, val.length - 1)
       result += `const ${key.trim()} = ref(${val})\n`
       return v
     })
+    return ''
   })
-  return result
+  return [result, r]
 }
 
 function getMethods(r: string) {
   let result
-  r.replace(METHODS, (_, v) => {
+  r = r.replace(METHODS, (_, v) => {
     const space = '$__temp'
     v = v.replace(/,\n\s*/g, space)
     result = getThisTransform(v).split(space).map(item => `function ${item}`).join('\n')
-    return result
+    return ''
   })
-  return result
+  return [result, r]
 }
 
 function getThisTransform(r: string) {
@@ -173,8 +199,10 @@ function getThisTransform(r: string) {
 
 function getComputed(r: string) {
   let result = ''
-  r.replace(COMPUTED, (_, v) =>
+  r = r.replace(COMPUTED, (_, v) => {
     getThisTransform(v).replace(COMPUTEDITEM, (_, key, val) =>
-      result += `const ${key} = computed(() => ${val})\n`))
-  return result
+      result += `const ${key} = computed(() => ${val})\n`)
+    return ''
+  })
+  return [result, r]
 }
