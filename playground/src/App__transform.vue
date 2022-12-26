@@ -1,26 +1,21 @@
 <script setup lang="ts">
-import { ref, defineProps, onMounted, computed } from 'vue'
+import { defineProps, ref, onMounted, computed } from 'vue'
 
-defineOptions({
-  name: 'App'
-})
+
 const props = defineProps<{name:String}>()
 
 const name = ref('simon')
-const age = ref(14)
+const count = ref(14)
 
-const name = computed(() => {
-return 'as'
-})
 const age = computed(() => {
 return 'as'
 })
 
 function increment() {
-age.value++
+count.value++
 }
 function decrement(){
-age.value--
+count.value--
 }
 onMounted(()=>{
 console.log('hi') // 0
@@ -28,7 +23,7 @@ console.log('hi') // 0
 </script>
 
 <template>
-  <div>App</div>
+  <div @click="increment">App {{count}}</div>
 </template>
 
 <style scoped lang="scss">

@@ -1,28 +1,23 @@
 <script lang="ts">
-import {ref} from 'vue'
 export default {
-  name: 'App',
   props: {
     name:String
   },
   data(){
     return{
       name:'simon',
-      age:14
+      count:14
     }
   },
   methods:{
     increment() {
-      this.age++
+      this.count++
     },
     decrement(){
-      this.age--
+      this.count--
     }
   },
   computed:{
-    name(){
-      return 'as'
-    },
     age(){
       return 'as'
 
@@ -35,7 +30,7 @@ export default {
 </script>
 
 <template>
-  <div>App</div>
+  <div @click="increment">App {{count}}</div>
 </template>
 
 <style scoped lang="scss">
