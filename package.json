@@ -1,7 +1,7 @@
 {
   "name": "vue-to-setup",
   "version": "0.0.3",
-  "packageManager": "pnpm@7.19.0",
+  "packageManager": "pnpm@7.20.0",
   "description": "vue-to-setup",
   "author": "Simon He",
   "license": "MIT",
