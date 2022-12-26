@@ -1,4 +1,5 @@
 import { trim } from 'lazy-js-utils'
+import { watch } from 'node:fs'
 const DEFINECOMPONENT = /^export default defineComponent\((.*})\)$/gms
 const NAME = /{\n\s*name:\s*(['"]\w+['"])/
 const PROPS = /props:\s*{[\s\n]*([\w:<>\s\[\],]+)}/gsm
@@ -16,6 +17,8 @@ const THISDEEP = /this.([$\_\w]+)[.]*/gms
 const COMPUTED = /computed:\s*{([\s\n\w\(\){}"'$-_]*)},/gm
 const COMPUTEDITEM = /(\w+)\(\)(\s*{[\s\n\w\-\+"'$\_.]*})/gm
 const IMPORTFROMVUE = /import\s+{([\w$,\s]+)}\s+from\s+['"]vue['"]/gm
+const WATCH = /watch:\s*{([\s\n\w\-\_$.'"\(\){},;]*})[\n\s]*},/
+const WATCHITEM = /(\w+)(\([\w,]*\))\s*({[\s\n\w.;'"$-_+-]*})/g
 export function transform(scriptStr: string): string {
   let result = ''
   const import_from_vue: string[] = []
@@ -36,7 +39,7 @@ export function transform(scriptStr: string): string {
       if (emit && !import_from_vue.includes('defineEmits')) {
         import_from_vue.push('defineEmits')
       }
-      const [setup, r3] = getSetup(r)
+      const [setup, r3] = getSetup(r, import_from_vue)
       r = r3
       if (setup && !import_from_vue.includes('ref')) {
         import_from_vue.push('ref')
@@ -82,10 +85,12 @@ export function transform(scriptStr: string): string {
       if (computed && !import_from_vue.includes('computed')) {
         import_from_vue.push('computed')
       }
-      const [name, r7] = getName(r) // defineOptions
+      const [watch, r7] = getWatch(r, import_from_vue)
       r = r7
+      const [name, r8] = getName(r) // defineOptions
+      r = r8
 
-      result = '\n' + [name, props, emit, data, computed, methods, mounted].join('\n')
+      result = '\n' + [name, props, emit, data, watch, computed, methods, mounted].join('\n')
       return r
     })
   }
@@ -135,10 +140,13 @@ function getEmit(r: string) {
 
 }
 
-function getSetup(r: string) {
+function getSetup(r: string, import_from_vue: string[]) {
   let setup
   r = r.replace(SETUP, (_: string, v: string) => {
-    v = v.replace('expose(', 'defineExpose(')
+    v = v.replace('expose(', () => {
+      import_from_vue.push('defineExpose')
+      return 'defineExpose('
+    })
       .replace(RETURN, '')
     setup = tidy(v)
     return ''
@@ -204,5 +212,22 @@ function getComputed(r: string) {
       result += `const ${key} = computed(() => ${val})\n`)
     return ''
   })
+  return [result, r]
+}
+
+function getWatch(r: string, import_from_vue: string[]) {
+  let result: string = ''
+  r = r.replace(WATCH, (_, v: string) => {
+    import_from_vue.push('watch')
+    getThisTransform(v).split(',\n').forEach(item => {
+      item.replace(WATCHITEM, (_: string, key: string, params: string, val: string) => {
+        const watch = `watch(${key}, ${params} => ${val})\n`
+        result += watch
+        return ''
+      })
+    })
+    return ''
+  })
+
   return [result, r]
 }

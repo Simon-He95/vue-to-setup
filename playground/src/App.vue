@@ -9,6 +9,14 @@ export default {
       count:14
     }
   },
+  watch:{
+    count(v){
+      console.log(this.name)
+    },
+    name(v){
+      console.log(v);
+    }
+  },
   methods:{
     increment() {
       this.count++
