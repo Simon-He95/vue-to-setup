@@ -3,6 +3,7 @@ import { watch } from 'node:fs'
 const DEFINECOMPONENT = /^export default defineComponent\((.*})\)$/gms
 const NAME = /{\n\s*name:\s*(['"]\w+['"])/
 const PROPS = /props:\s*{[\s\n]*([\w:<>\s\[\],]+)}/gsm
+const PROPSARRAY = /props:\s*\[([\s'"\w\-\_$,]+)*\]/g
 const PROPSHASAS = /(\w+):\s*\w+\s*as\s*PropType<([\w\[\]]+)>/gsm
 const EMIT = /emit:\s*(\[.*\])/gsm
 const SETUP = /setup\([\w,\s{}:]+\)\s*{(.*)}\n/gsm
@@ -19,6 +20,7 @@ const COMPUTEDITEM = /(\w+)\(\)(\s*{[\s\n\w\-\+"'$\_.]*})/gm
 const IMPORTFROMVUE = /import\s+{([\w$,\s]+)}\s+from\s+['"]vue['"]/gm
 const WATCH = /watch:\s*{([\s\n\w\-\_$.'"\(\){},;]*})[\n\s]*},/
 const WATCHITEM = /(\w+)(\([\w,]*\))\s*({[\s\n\w.;'"$-_+-]*})/g
+const MODELEVENT = /model:\s*{[\n\s\w'"-_$]+event:\s*(['"][\w\-\_$]+['"])/
 export function transform(scriptStr: string): string {
   let result = ''
   const import_from_vue: string[] = []
@@ -36,7 +38,7 @@ export function transform(scriptStr: string): string {
       }
       const [emit, r2] = getEmit(r)
       r = r2
-      if (emit && !import_from_vue.includes('defineEmits')) {
+      if (emit.length && !import_from_vue.includes('defineEmits')) {
         import_from_vue.push('defineEmits')
       }
       const [setup, r3] = getSetup(r, import_from_vue)
@@ -64,7 +66,7 @@ export function transform(scriptStr: string): string {
       }
       const [emit, r2] = getEmit(r)
       r = r2
-      if (emit && !import_from_vue.includes('defineEmits')) {
+      if (emit.length && !import_from_vue.includes('defineEmits')) {
         import_from_vue.push('defineEmits')
       }
       const [data, r3] = getData(r)
@@ -115,12 +117,22 @@ function getName(r: string) {
 }
 
 function getProps(r: string) {
-  let definePropsType
-  r = r.replace(PROPS, (_: string, v: string) => {
-    v = v.replace(PROPSHASAS, (_, v1, v2) => `${v1}: ${v2}`)
-    definePropsType = trim(v, 'all').replace(',', ';')
-    return ''
-  })
+  let definePropsType = ''
+  if (PROPSARRAY.test(r)) {
+    r = r.replace(PROPSARRAY, (_: string, v: string) => {
+      v.split(',').forEach(item => {
+        item = item.replace(/['"]/g, '')
+        definePropsType += `${item}: String;`
+      })
+      return ''
+    })
+  } else if (PROPS.test(r)) {
+    r = r.replace(PROPS, (_: string, v: string) => {
+      v = v.replace(PROPSHASAS, (_, v1, v2) => `${v1}: ${v2}`)
+      definePropsType = trim(v, 'all').replace(',', ';')
+      return ''
+    })
+  }
   if (definePropsType) {
     return [`const props = defineProps<{${definePropsType}}>()`, r]
   }
@@ -128,13 +140,17 @@ function getProps(r: string) {
 }
 
 function getEmit(r: string) {
-  let emit
-  r = r.replace(EMIT, (_: string, v: string) => {
-    emit = v
+  const emit: string[] = []
+  r = r.replace(MODELEVENT, (_: string, v: string) => {
+    emit.push(trim(v, 'all'))
     return ''
   })
-  if (emit) {
-    return [`const emit = defineEmits(${emit})`, r]
+  r = r.replace(EMIT, (_: string, v: string) => {
+    emit.push(trim(v, 'all'))
+    return ''
+  })
+  if (emit.length) {
+    return [`const emit = defineEmits(${emit.join(',')})`, r]
   }
   return [emit, r]
 

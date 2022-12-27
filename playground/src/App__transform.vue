@@ -8,7 +8,7 @@ const name = ref('simon')
 const count = ref(14)
 
 watch(count, (v) => {
-console.log(name.value)
+console.log(v)
 })
 watch(name, (v) => {
 console.log(v);
