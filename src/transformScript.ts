@@ -1,5 +1,4 @@
 import { trim } from 'lazy-js-utils'
-import { watch } from 'node:fs'
 const DEFINECOMPONENT = /^export default defineComponent\((.*})\)$/gms
 const NAME = /{\n\s*name:\s*(['"]\w+['"])/
 const PROPS = /props:\s*{[\s\n]*([\w:<>\s\[\],]+)}/gsm
@@ -11,7 +10,8 @@ const RETURN = /return\s*{.*}$/gsm
 const MOUNTED = /mounted\(\){(.*)}\n/gsm
 const THISFN = /this.([\w\_\-$]+\(\))/gsm
 const EXPORTDEFAULT = /export default\s*{(.*)}/gsm
-const DATA = /data\s*\(\s*\)\s*{[\n\s]*return\s*{[\n\s]*([\n\s\w\_:'",]+)}[\s\n]*},/gm
+const DATA = /data\s*\(\s*\)\s*{[\n\s]*return\s*{[\n\s]*([\n\s\w\_:'",]+)}[\s\n]*},/g
+const DATAFUNCTION = /data:\s*function\s*\(\)\s*{[\n\s]*return\s*{[\n\s]*([\n\s\w\_:'",]+)}[\s\n]*}/g
 const DATAITEM = /(.*):\s*(.*)[,\n\s]/gm
 const METHODS = /methods:\s*{([\w\s\n"'\-\_$+\-{}\(\).,]*)},/gms
 const THISDEEP = /this.([$\_\w]+)[.]*/gms
@@ -192,15 +192,27 @@ function tidy(v: string) {
 
 function getData(r: string) {
   let result: string = ''
-  r = r.replace(DATA, (_, v) => {
-    v.replace(DATAITEM, (_: string, key: string, val: string) => {
-      if (val.endsWith(','))
-        val = val.substring(0, val.length - 1)
-      result += `const ${key.trim()} = ref(${val})\n`
-      return v
+  if (DATAFUNCTION.test(r)) {
+    r = r.replace(DATAFUNCTION, (_, v) => {
+      v.replace(DATAITEM, (_: string, key: string, val: string) => {
+        if (val.endsWith(','))
+          val = val.substring(0, val.length - 1)
+        result += `const ${key.trim()} = ref(${val})\n`
+        return v
+      })
+      return ''
     })
-    return ''
-  })
+  } else if (DATA.test(r)) {
+    r = r.replace(DATA, (_, v) => {
+      v.replace(DATAITEM, (_: string, key: string, val: string) => {
+        if (val.endsWith(','))
+          val = val.substring(0, val.length - 1)
+        result += `const ${key.trim()} = ref(${val})\n`
+        return v
+      })
+      return ''
+    })
+  }
   return [result, r]
 }
 
