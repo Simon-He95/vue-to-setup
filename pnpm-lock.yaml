@@ -12,7 +12,7 @@ importers:
       eslint: ^8.26.0
       eslint-plugin-n: ^15.3.0
       fast-glob: ^3.2.12
-      lazy-js-utils: ^0.0.28
+      lazy-js-utils: ^0.0.39
       lint-staged: ^13.1.0
       picocolors: ^1.0.0
       prettier: ^2.8.1
@@ -34,7 +34,7 @@ importers:
       eslint: 8.26.0
       eslint-plugin-n: 15.3.0_eslint@8.26.0
       fast-glob: 3.2.12
-      lazy-js-utils: 0.0.28_typescript@4.8.4
+      lazy-js-utils: 0.0.39_vue@3.2.41
       lint-staged: 13.1.0
       picocolors: 1.0.0
       prettier: 2.8.1
@@ -823,10 +823,6 @@ packages:
     resolution: {integrity: sha512-PBjIUxZHOuj0R15/xuwJYjFi+KZdNFrehocChv4g5hu6aFroHue8m0lBP0POdK2nKzbw0cgV1mws8+V/JAcEkQ==}
     dev: true
 
-  /@types/web-bluetooth/0.0.14:
-    resolution: {integrity: sha512-5d2RhCard1nQUC3aHcq/gHzWYO6K0WJmAbjO7mQJgCQKtZpgXxv1rOM6O/dBDhDYYVutk1sciOgNSe+5YyfM8A==}
-    dev: true
-
   /@types/web-bluetooth/0.0.16:
     resolution: {integrity: sha512-oh8q2Zc32S6gd/j50GowEjKLoOVOwHP/bWVjKJInBwQqdOYMdPrf1oVlelTlyfFK3CKxL1uahMDAr+vy8T7yMQ==}
 
@@ -1506,24 +1502,6 @@ packages:
       vue: 3.2.36
     dev: true
 
-  /@vueuse/core/8.9.4_vue@3.2.41:
-    resolution: {integrity: sha512-B/Mdj9TK1peFyWaPof+Zf/mP9XuGAngaJZBwPaXBvU3aCTZlx3ltlrFFFyMV4iGBwsjSCeUCgZrtkEj9dS2Y3Q==}
-    peerDependencies:
-      '@vue/composition-api': ^1.1.0
-      vue: ^2.6.0 || ^3.2.0
-    peerDependenciesMeta:
-      '@vue/composition-api':
-        optional: true
-      vue:
-        optional: true
-    dependencies:
-      '@types/web-bluetooth': 0.0.14
-      '@vueuse/metadata': 8.9.4
-      '@vueuse/shared': 8.9.4_vue@3.2.41
-      vue: 3.2.41
-      vue-demi: 0.13.11_vue@3.2.41
-    dev: true
-
   /@vueuse/core/9.7.0_vue@3.2.36:
     resolution: {integrity: sha512-/AGY/t7jJPxCyRoVTygNKoroTiCvRaaZIW+yeSlBCnI7QRpQ9cvXNTdNaSl3GvSyFbn83+XwZwEZvI1OpQfeGw==}
     dependencies:
@@ -1547,27 +1525,8 @@ packages:
       - vue
     dev: false
 
-  /@vueuse/metadata/8.9.4:
-    resolution: {integrity: sha512-IwSfzH80bnJMzqhaapqJl9JRIiyQU0zsRGEgnxN6jhq7992cPUJIRfV+JHRIZXjYqbwt07E1gTEp0R0zPJ1aqw==}
-    dev: true
-
   /@vueuse/metadata/9.7.0:
     resolution: {integrity: sha512-M7WsAgw28FNtTH0bzsGuHEtJOPJqPpyeHS6PHq+8UesLgNjZ9waMAntiUrgUQlxt09M4i2lH7y9sRi0jkfeXGA==}
-
-  /@vueuse/shared/8.9.4_vue@3.2.41:
-    resolution: {integrity: sha512-wt+T30c4K6dGRMVqPddexEVLa28YwxW5OFIPmzUHICjphfAuBFTTdDoyqREZNDOFJZ44ARH1WWQNCUK8koJ+Ag==}
-    peerDependencies:
-      '@vue/composition-api': ^1.1.0
-      vue: ^2.6.0 || ^3.2.0
-    peerDependenciesMeta:
-      '@vue/composition-api':
-        optional: true
-      vue:
-        optional: true
-    dependencies:
-      vue: 3.2.41
-      vue-demi: 0.13.11_vue@3.2.41
-    dev: true
 
   /@vueuse/shared/9.7.0_vue@3.2.36:
     resolution: {integrity: sha512-pwmt1y3TJ2s5KqWmkv9ZKEV59GwuZQZk8XLiU+hGswz0jej318ozbea9E4A/A50ksyM26swSFr7sZ9llNPsZHg==}
@@ -3971,22 +3930,24 @@ packages:
     resolution: {integrity: sha512-dLkz37Ab97HWMx9KTes3Tbi3D1ln9fCAy2zr2YVExJasDRPGRaKcoE4fycWNtnCAJfjFqe0cnY+f8KT2JePEXQ==}
     dev: true
 
-  /lazy-js-utils/0.0.28_typescript@4.8.4:
-    resolution: {integrity: sha512-WhCoTF4cuhsG2GcZnsm27TreMGpAroYZ4dMjr0dwOa0mcLICxjvWFC9jbxWWkeegqTn/w11ChMP/ebnVtL15dQ==}
+  /lazy-js-utils/0.0.37_vue@3.2.41:
+    resolution: {integrity: sha512-kr6ehqgZmUDkBFUdFaOby43wZ/fdUODJVDRY4v0ZlGoTKTXZ/huea8Mu9LA2ThSt11URObpE+DMWS+IHBtKW2w==}
+    peerDependencies:
+      vue: ^3.2.41
     dependencies:
-      '@vueuse/core': 8.9.4_vue@3.2.41
+      vue: 3.2.41
+    dev: true
+
+  /lazy-js-utils/0.0.39_vue@3.2.41:
+    resolution: {integrity: sha512-QSpgcSIU/r4SzawlicNTt4uN5e0aRY2hhRl/tIOdOZ5Y/tfhsf1Hl7eBDcHHVdHSOxstaZDe14xDcLuRs93Jpg==}
+    peerDependencies:
+      vue: ^3.2.41
+    dependencies:
       htmlparser2: 8.0.1
+      lazy-js-utils: 0.0.37_vue@3.2.41
       qrcode: 1.5.1
       spark-md5: 3.0.2
-      tsup: 6.5.0_typescript@4.8.4
       vue: 3.2.41
-    transitivePeerDependencies:
-      - '@swc/core'
-      - '@vue/composition-api'
-      - postcss
-      - supports-color
-      - ts-node
-      - typescript
     dev: true
 
   /levn/0.3.0:
@@ -5673,6 +5634,7 @@ packages:
         optional: true
     dependencies:
       vue: 3.2.41
+    dev: false
 
   /vue-eslint-parser/9.1.0_eslint@8.16.0:
     resolution: {integrity: sha512-NGn/iQy8/Wb7RrRa4aRkokyCZfOUWk19OP5HP6JEozQFX5AoS/t+Z0ZN7FY4LlmWc4FNI922V7cvX28zctN8dQ==}
