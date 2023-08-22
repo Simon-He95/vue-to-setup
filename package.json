@@ -71,7 +71,7 @@
     "@vitejs/plugin-vue": "^4.0.0",
     "bumpp": "^8.2.1",
     "eslint": "^8.26.0",
-    "eslint-plugin-n": "^15.3.0",
+    "eslint-plugin-n": "^16.0.0",
     "fast-glob": "^3.2.12",
     "lazy-js-utils": "^0.0.28",
     "lint-staged": "^13.1.0",
